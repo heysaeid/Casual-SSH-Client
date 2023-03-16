@@ -64,5 +64,10 @@ elif [[ "$1" == "ssh" ]]; then
     
     counter=$((counter+1))
   done
+
+  if [[ "$3" == "sync" ]]; then
+    tmux setw synchronize-panes on
+  fi
+  
   tmux attach -t casual
 fi
