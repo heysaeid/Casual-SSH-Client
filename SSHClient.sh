@@ -3,6 +3,12 @@
 SSH_CONFIG_FILE="$HOME/.ssh/sessions.conf"
 SSH_SESSIONS=($(awk -F',' '{print $1}' "$SSH_CONFIG_FILE"))
 
+get_sessions () {
+  for i in "${!SSH_SESSIONS[@]}"; do
+    echo "[$i] ${SSH_SESSIONS[$i]}"
+  done
+}
+
 if [[ "$1" == "add" ]]; then
   # Prompt the user for the new SSH session information
   read -p "Enter a name for the new SSH session: " SSH_NAME
@@ -23,9 +29,7 @@ if [[ "$1" == "add" ]]; then
 elif [[ "$1" == "remove" ]]; then
   # Display the list of SSH sessions and prompt the user to select one to remove
   echo "Select an SSH session to remove:"
-  for i in "${!SSH_SESSIONS[@]}"; do
-    echo "[$i] ${SSH_SESSIONS[$i]}"
-  done
+  get_sessions
   read -p "Enter selection: " selection
 
   # Check if the selection is valid
@@ -40,6 +44,8 @@ elif [[ "$1" == "remove" ]]; then
 
   echo "SSH session removed: $session_name"
   exit 0
+elif [[ "$1" == "ls" ]]; then
+  get_sessions
 elif [[ "$1" == "ssh" ]]; then
   tmux new-session -d -s casual
   counter=1
@@ -68,6 +74,6 @@ elif [[ "$1" == "ssh" ]]; then
   if [[ "$3" == "sync" ]]; then
     tmux setw synchronize-panes on
   fi
-  
+
   tmux attach -t casual
 fi
