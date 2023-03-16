@@ -8,6 +8,7 @@ if [[ "$1" == "add" ]]; then
   read -p "Enter a name for the new SSH session: " SSH_NAME
   read -p "Enter the remote host for the new SSH session: " SSH_HOST
   read -p "Enter the SSH user for the new SSH session: " SSH_USER
+  read -p "Enter the SSH password for the session: " SSH_PASSWORD
   read -p "Enter the SSH port for the new SSH session (leave blank for default): " SSH_PORT
 
   # If no SSH port was provided, use the default (22)
@@ -16,7 +17,7 @@ if [[ "$1" == "add" ]]; then
   fi
 
   # Append the new SSH session to the configuration file
-  echo "${SSH_NAME},${SSH_HOST},${SSH_USER},${SSH_PORT}" >> "$SSH_CONFIG_FILE"
+  echo "${SSH_NAME},${SSH_HOST},${SSH_USER},${SSH_PASSWORD},${SSH_PORT}" >> "$SSH_CONFIG_FILE"
   echo "SSH session added: $SSH_NAME"
   exit 0
 elif [[ "$1" == "remove" ]]; then
@@ -39,24 +40,29 @@ elif [[ "$1" == "remove" ]]; then
 
   echo "SSH session removed: $session_name"
   exit 0
-else
-  # Check if the user specified a number of panes
-  if [[ $# -eq 0 ]]; then
-    echo "Usage: $0 <num_panes>"
-    exit 1
-  fi
+elif [[ "$1" == "ssh" ]]; then
+  tmux new-session -d -s casual
+  counter=1
+  for session_name in $(echo "$2" | sed "s/,/ /g"); do
+    session_info=$(grep "^$session_name," "$SSH_CONFIG_FILE")
+    if [[ -z "$session_info" ]]; then
+      echo "Error: Session '$session_name' not found in config file '$SSH_CONFIG_FILE'"
+      exit 1
+    fi
+    
+    session_host=$(echo "$session_info" | awk -F',' '{print $2}')
+    session_user=$(echo "$session_info" | awk -F',' '{print $3}')
+    session_password=$(echo "$session_info" | awk -F',' '{print $4}')
+    session_port=$(echo "$session_info" | awk -F',' '{print $5}')
+    echo $session_info
 
-  num_panes=$1
-
-  # Create a new tmux session with the specified number of panes
-  tmux new-session -d -s ssh-session "bash"
-  for i in $(seq 2 $num_panes); do
-    tmux split-window "bash"
+    if [[ "$counter" == "1" ]]; then
+      tmux send-keys "sshpass -p '$session_password' ssh -t -p $session_port $session_user@$session_host" C-m
+    else 
+      tmux split-window -h "sshpass -p '$session_password' ssh -t -p $session_port $session_user@$session_host"    
+    fi
+    
+    counter=$((counter+1))
   done
-
-  # Synchronize input between the panes
-  tmux setw synchronize-panes on
-
-  # Attach to the tmux session
-  tmux attach -t ssh-session
+  tmux attach -t casual
 fi
