@@ -15,6 +15,9 @@ Install [tmux](https://github.com/tmux/tmux/wiki/Installing) according to your o
 ### Add session
 ``` casual add ```
 
+### Edit session
+``` casual edit ```
+
 
 ### Remove session
 ``` casual remove ```
