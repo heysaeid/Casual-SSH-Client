@@ -44,6 +44,35 @@ elif [[ "$1" == "remove" ]]; then
 
   echo "SSH session removed: $session_name"
   exit 0
+elif [[ "$1" == "edit" ]]; then
+  # Display existing sessions
+  for i in "${!SSH_SESSIONS[@]}"; do
+    echo "[$i] ${SSH_SESSIONS[$i]}"
+  done
+
+  # Prompt the user for the session they want to modify
+  read -p "Enter the index of the session to modify: " session_index
+  session_index=$((session_index+1))
+
+  # Get the existing session information
+  existing_session_info=$(sed -n "${session_index}p" "$SSH_CONFIG_FILE")
+  session_name=$(echo "$existing_session_info" | cut -d',' -f1)
+  server_address=$(echo "$existing_session_info" | cut -d',' -f2)
+  port_number=$(echo "$existing_session_info" | cut -d',' -f3)
+  username=$(echo "$existing_session_info" | cut -d',' -f4)
+  password=$(echo "$existing_session_info" | cut -d',' -f5)
+
+  # Prompt the user for new session information
+  read -p "Enter new session name [$session_name]: " new_session_name
+  read -p "Enter new server address [$server_address]: " new_server_address
+  read -p "Enter new port number [$port_number]: " new_port_number
+  read -p "Enter new username [$username]: " new_username
+  read -sp "Enter new password: " new_password
+  echo -e "\n"
+
+  # Replace the existing session information with the new session information
+  sed -i "${session_index}s/.*/${new_session_name:-$session_name},${new_server_address:-$server_address},${new_port_number:-$port_number},${new_username:-$username},${new_password:-$password}/" "$SSH_CONFIG_FILE"
+  echo "Session modified successfully!"
 elif [[ "$1" == "ls" ]]; then
   get_sessions
 elif [[ "$1" == "ssh" ]]; then
