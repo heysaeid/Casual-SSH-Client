@@ -9,25 +9,40 @@ Install [tmux](https://github.com/tmux/tmux/wiki/Installing) according to your o
 
 
 ### Grant execute access
-``` chmod +x casual.sh```
+```shell
+shell chmod +x casual.sh
+```
 
 
 ### Add session
-``` casual add ```
+```shell
+casual add
+```
 
 ### Edit session
-``` casual edit ```
+```shell
+s casual edit
+```
 
 
 ### Remove session
-``` casual remove ```
+```shell 
+casual remove
+```
 
 
 ### View the list of sessions
-``` casual ls ```
+```shell
+casual ls
+```
 
 
 ### SSH
-``` casual ssh session_name1,session_name2,session_name2 ```</br>
+```shell
+casual ssh session_name1,session_name2,session_name2
+```
+
 If needed, synchronize-panes mode</br>
-``` casual ssh session_name1,session_name2,session_name2 sync```
+```shell
+ casual ssh session_name1,session_name2,session_name2 sync
+```
